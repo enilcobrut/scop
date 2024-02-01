@@ -11,10 +11,10 @@ SRCS = $(SRCS_DIR)/scop.cpp
 OBJS_DIR = objs
 OBJS = $(OBJS_DIR)/scop.o
 
-INCLUDES = -I$(HEADER_DIR) -I/opt/homebrew/include -I/usr/local/include
-LIBS = -L/opt/homebrew/lib -L/usr/local/lib -lglfw -lGLEW -framework OpenGL
+INCLUDES = -I$(HEADER_DIR) -I/usr/include
+LIBS = -L/usr/lib -lglfw -lGL -lm -lpthread -ldl
 
-CC = c++
+CC = g++
 CPPFLAGS = -Wall -Wextra -Werror -std=c++98# -g -fsanitize=address
 
 all: $(NAME)
