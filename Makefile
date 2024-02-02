@@ -1,39 +1,35 @@
+# Paramètres de compilation
+NAME = scop
+CC = g++
+CPPFLAGS = -Wall -Wextra -Werror -std=c++20
+INCLUDES = -Iincludes -I/usr/include
+LIBS = -L/usr/lib -lglfw -lGL -lm -lpthread -ldl
 MAKEFLAGS = "-j 10"
 
-NAME = scop
-
-HEADER_DIR = includes
-HEADER = $(HEADER_DIR)/scop.hpp
-
+# Répertoires et fichiers
 SRCS_DIR = srcs
-SRCS = $(SRCS_DIR)/main.cpp
-
 OBJS_DIR = objs
-OBJS = $(OBJS_DIR)/main.o
+SRCS = $(wildcard $(SRCS_DIR)/*.cpp)
+OBJS = $(SRCS:$(SRCS_DIR)/%.cpp=$(OBJS_DIR)/%.o)
 
-INCLUDES = -I$(HEADER_DIR) -I/usr/include
-LIBS = -L/usr/lib -lglfw -lGL -lm -lpthread -ldl
-
-CC = g++
-CPPFLAGS = -Wall -Wextra -Werror -std=c++20# -g -fsanitize=address
-
+# Règles
 all: $(NAME)
 
-clean:
-	@rm -rf $(OBJS_DIR)
+$(NAME): $(OBJS)
+	$(CC) $(OBJS) $(CPPFLAGS) $(INCLUDES) -o $(NAME) $(LIBS)
 
-fclean: clean
-	@rm -f $(NAME)
-
-re:
-	make fclean
-	make all
-
-$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp $(HEADER)
+$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp
 	mkdir -p $(OBJS_DIR)
 	$(CC) $< $(CPPFLAGS) $(INCLUDES) -c -o $@
 
-$(NAME): $(OBJS)
-	@$(CC) $(OBJS) $(CPPFLAGS) $(INCLUDES) -o $(NAME) $(LIBS)
+clean:
+	rm -rf $(OBJS_DIR)
+
+fclean: clean
+	rm -f $(NAME)
+
+re: fclean
+	@make all
+
 
 .PHONY: all clean fclean re

@@ -37,8 +37,8 @@ int main(int argc, char *argv[]) {
 
     Figure myFigure(filePath.string());
 
-    // myFigure.displayVertices();
-    // myFigure.displayFaces();
+    myFigure.displayVertices();
+    myFigure.displayFaces();
 
     glfwSetErrorCallback(error_callback);
 

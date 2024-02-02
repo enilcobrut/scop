@@ -1,99 +1,94 @@
-#pragma once
-
+#include <iostream>
 #include <vector>
 #include <fstream>
 #include <sstream>
-#include <iostream>
+#include <string>
+#include <optional>
+#include <GLFW/glfw3.h>
+#include <array>
+
+struct FaceVertex {
+    GLuint vertexIndex;
+    std::optional<GLuint> textureIndex;
+    std::optional<GLuint> normalIndex;
+
+    FaceVertex(GLuint vIdx, std::optional<GLuint> tIdx = std::nullopt, std::optional<GLuint> nIdx = std::nullopt)
+        : vertexIndex(vIdx), textureIndex(tIdx), normalIndex(nIdx) {}
+};
+
+struct Face {
+    std::vector<FaceVertex> vertices;
+};
 
 class Figure {
 public:
-    Figure(const std::string& filename);
-    ~Figure();
-    
-    const std::vector<GLfloat>& getVertices() const { return vertices; }
-    const std::vector<GLint>& getFaces() const { return faces; }
-
+    Figure(const std::string& filename) {
+        parseObjFile(filename);
+    }
 
     void displayVertices() const {
-        const std::vector<GLfloat>& vertices = getVertices();
-        for (size_t i = 0; i < vertices.size(); i += 3) {
-            std::cout << "Vertex " << i / 3 << ": " << vertices[i] << ", " << vertices[i + 1] << ", " << vertices[i + 2] << std::endl;
+        for (const auto& vertex : vertices) {
+            std::cout << "Vertex: " << vertex[0] << ", " << vertex[1] << ", " << vertex[2] << std::endl;
         }
     }
 
-    // Méthode pour afficher les indices des faces
     void displayFaces() const {
-        const std::vector<GLint>& faces = getFaces();
-        for (size_t i = 0; i < faces.size(); i += 3) {
-            std::cout << "Face " << i / 3 << ": " << faces[i] << ", " << faces[i + 1] << ", " << faces[i + 2] <<  ", " << faces[i + 3] << std::endl;
+        for (const auto& face : faces) {
+            std::cout << "Face: ";
+            for (const auto& vertex : face.vertices) {
+                std::cout << vertex.vertexIndex << " ";
+                if (vertex.textureIndex.has_value()) {
+                    std::cout << "/" << vertex.textureIndex.value() << " ";
+                }
+                if (vertex.normalIndex.has_value()) {
+                    std::cout << "/" << vertex.normalIndex.value() << " ";
+                }
+            }
+            std::cout << std::endl;
         }
     }
 
 private:
-    std::vector<GLfloat> vertices; // stocke les coordonnées des sommets
-    std::vector<GLint> faces;      // stocke les indices des faces
-};
+    std::vector<std::array<GLfloat, 3>> vertices; // Stocke les coordonnées des vertices
+    std::vector<Face> faces; // Utilise la structure Face pour stocker les faces
 
-Figure::Figure(const std::string& filename) {
-    std::ifstream file(filename);
-    if (!file.is_open()) {
-        std::cerr << "Erreur lors de l'ouverture du fichier " << filename << std::endl;
-        exit(EXIT_FAILURE);
-    }
-    std::string line;
+    void parseObjFile(const std::string& filename) {
+        std::ifstream file(filename);
+        if (!file.is_open()) {
+            std::cerr << "Erreur lors de l'ouverture du fichier " << filename << std::endl;
+            exit(EXIT_FAILURE);
+        }
 
+        std::string line;
+        while (std::getline(file, line)) {
+            std::istringstream iss(line);
+            std::string prefix;
+            iss >> prefix;
+            if (prefix == "v") {
+                GLfloat x, y, z;
+                iss >> x >> y >> z;
+                vertices.push_back({x, y, z});
+            } else if (prefix == "f") {
+                Face face;
+                std::string vertex;
+                while (iss >> vertex) {
+                    std::istringstream vertexStream(vertex);
+                    std::string vertexIndex, textureIndex, normalIndex;
 
-    while (std::getline(file, line)) {
-        std::istringstream iss(line);
-        std::string token;
+                    std::getline(vertexStream, vertexIndex, '/');
+                    std::getline(vertexStream, textureIndex, '/');
+                    std::getline(vertexStream, normalIndex, '/');
 
-        iss >> token;
-        if (token == "v") {
-            GLfloat x, y, z;
-            iss >> x >> y >> z;
-            std::cout << "Vertex: " << x << " " << y << " " << z << std::endl;
-            vertices.push_back(x);
-            vertices.push_back(y);
-            vertices.push_back(z);
-        } else if (token == "f") {
-            std::vector<GLint> faceIndices;
-            GLint index;
-            while (iss >> index) {
-               // std::cout << "Read index: " << index << std::endl;
-                faceIndices.push_back(index - 1); // Soustraction de 1 pour chaque indice
-            }
+                    GLuint vIdx = std::stoul(vertexIndex) - 1;
+                    std::optional<GLuint> tIdx = textureIndex.empty() ? std::nullopt : std::optional<GLuint>(std::stoul(textureIndex) - 1);
+                    std::optional<GLuint> nIdx = normalIndex.empty() ? std::nullopt : std::optional<GLuint>(std::stoul(normalIndex) - 1);
 
-            // Assurez-vous que la face a trois ou quatre indices
-            if (faceIndices.size() == 3 || faceIndices.size() == 4) {
-                std::cout << "Face indices: ";
-                for (GLint faceIndex : faceIndices) {
-                    std::cout << faceIndex << " ";
+                    face.vertices.push_back(FaceVertex(vIdx, tIdx, nIdx));
                 }
-                std::cout << std::endl;
-
-                // Ajoutez les indices à la liste des faces
-                for (GLint faceIndex : faceIndices) {
-                    faces.push_back(faceIndex);
-                }
-            } else {
-                std::cerr << "Nombre d'indices de face invalide." << std::endl;
-                std::cerr << "Ligne: " << line << std::endl; // Ajout pour afficher la ligne du fichier
-                std::cerr << "Indices de face: ";
-                for (GLint faceIndex : faceIndices) {
-                    std::cerr << faceIndex << " ";
-                }
-                std::cerr << std::endl;
-                exit(EXIT_FAILURE);
+                faces.push_back(face);
             }
         }
+
+        file.close();
     }
-
-
-
-
-    file.close();
-}
-
-
-Figure::~Figure() {
-}
+};
