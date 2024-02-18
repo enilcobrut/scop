@@ -44,6 +44,23 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+       Figure myFigure(filePath.string());
+
+        std::cout << "\n====== map list vertex :  ======\n" << std::endl;
+
+        myFigure.printListCoordVertex();
+
+        std::cout << "\n====== map list Vn :  ======\n" << std::endl;
+
+        myFigure.printListCoordVn();
+
+        std::cout << "\n====== map list Vt :  ======\n" << std::endl;
+
+        myFigure.printListCoordVt();
+        std::cout << "\n====== Face et Points :  ======\n" << std::endl;
+
+        myFigure.printFace();
+
     glfwSetErrorCallback(error_callback);
 
     if (!glfwInit()) {
@@ -53,7 +70,7 @@ int main(int argc, char *argv[]) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
+    glfwWindowHint(GLFW_SAMPLES, 256);
     GLFWwindow* window = glfwCreateWindow(800, 800, "OpenGL Window", nullptr, nullptr);
     if (!window) {
         glfwTerminate();
@@ -70,80 +87,98 @@ int main(int argc, char *argv[]) {
 
        float vertices[] = {
         // Face avant (Z positif)
-        -1.0f, -1.0f,  1.0f, // Bas gauche
-        1.0f, -1.0f,  1.0f, // Bas droit
-        1.0f,  1.0f,  1.0f, // Haut droit
-        1.0f,  1.0f,  1.0f, // Haut droit
-        -1.0f,  1.0f,  1.0f, // Haut gauche
-        -1.0f, -1.0f,  1.0f, // Bas gauche
+        -1.0f, -1.0f,  1.0f,  0.0f,0.0f,1.0f,// Bas gauche
+        1.0f, -1.0f,  1.0f,  0.0f,0.0f,1.0f,// Bas droit
+        1.0f,  1.0f,  1.0f,  0.0f,0.0f,1.0f,// Haut droit
+        1.0f,  1.0f,  1.0f, 0.0f,0.0f,1.0f, // Haut droit
+        -1.0f,  1.0f,  1.0f, 0.0f,0.0f,1.0f, // Haut gauche
+        -1.0f, -1.0f,  1.0f, 0.0f,0.0f,1.0f, // Bas gauche
 
         // Face arrière (Z négatif)
-        -1.0f, -1.0f, -1.0f, // Bas gauche
-        1.0f, -1.0f, -1.0f, // Bas droit
-        1.0f,  1.0f, -1.0f, // Haut droit
-        1.0f,  1.0f, -1.0f, // Haut droit
-        -1.0f,  1.0f, -1.0f, // Haut gauche
-        -1.0f, -1.0f, -1.0f, // Bas gauche
+        -1.0f, -1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Bas gauche
+        1.0f, -1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Bas droit
+        1.0f,  1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Haut droit
+        1.0f,  1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Haut droit
+        -1.0f,  1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Haut gauche
+        -1.0f, -1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Bas gauche
 
         // Face gauche (X négatif)
-        -1.0f,  1.0f,  1.0f, // Haut avant
-        -1.0f,  1.0f, -1.0f, // Haut arrière
-        -1.0f, -1.0f, -1.0f, // Bas arrière
-        -1.0f, -1.0f, -1.0f, // Bas arrière
-        -1.0f, -1.0f,  1.0f, // Bas avant
-        -1.0f,  1.0f,  1.0f, // Haut avant
+        -1.0f,  1.0f,  1.0f,  -1.0f,0.0f,0.0f,// Haut avant
+        -1.0f,  1.0f, -1.0f,  -1.0f,0.0f,0.0f,// Haut arrière
+        -1.0f, -1.0f, -1.0f, -1.0f,0.0f,0.0f, // Bas arrière
+        -1.0f, -1.0f, -1.0f, -1.0f,0.0f,0.0f, // Bas arrière
+        -1.0f, -1.0f,  1.0f,  -1.0f,0.0f,0.0f,// Bas avant
+        -1.0f,  1.0f,  1.0f,  -1.0f,0.0f,0.0f,// Haut avant
 
         // Face droite (X positif)
-        1.0f,  1.0f,  1.0f, // Haut avant
-        1.0f, -1.0f, -1.0f, // Bas arrière
-        1.0f,  1.0f, -1.0f, // Haut arrière
-        1.0f, -1.0f, -1.0f, // Bas arrière
-        1.0f,  1.0f,  1.0f, // Haut avant
-        1.0f, -1.0f,  1.0f, // Bas avant
+        1.0f,  1.0f,  1.0f,  1.0f,0.0f,0.0f,// Haut avant
+        1.0f, -1.0f, -1.0f,  1.0f,0.0f,0.0f,// Bas arrière
+        1.0f,  1.0f, -1.0f,  1.0f,0.0f,0.0f,// Haut arrière
+        1.0f, -1.0f, -1.0f,  1.0f,0.0f,0.0f,// Bas arrière
+        1.0f,  1.0f,  1.0f,  1.0f,0.0f,0.0f,// Haut avant
+        1.0f, -1.0f,  1.0f,  1.0f,0.0f,0.0f,// Bas avant
 
         // Face supérieure (Y positif)
-        -1.0f,  1.0f, -1.0f, // Arrière gauche
-        1.0f,  1.0f, -1.0f, // Arrière droit
-        1.0f,  1.0f,  1.0f, // Avant droit
-        1.0f,  1.0f,  1.0f, // Avant droit
-        -1.0f,  1.0f,  1.0f, // Avant gauche
-        -1.0f,  1.0f, -1.0f, // Arrière gauche
+        -1.0f,  1.0f, -1.0f,  0.0f,1.0f,0.0f,// Arrière gauche
+        1.0f,  1.0f, -1.0f,  0.0f,1.0f,0.0f,// Arrière droit
+        1.0f,  1.0f,  1.0f,  0.0f,1.0f,0.0f,// Avant droit
+        1.0f,  1.0f,  1.0f,  0.0f,1.0f,0.0f,// Avant droit
+        -1.0f,  1.0f,  1.0f,  0.0f,1.0f,0.0f,// Avant gauche
+        -1.0f,  1.0f, -1.0f,  0.0f,1.0f,0.0f,// Arrière gauche
 
         // Face inférieure (Y négatif)
-        -1.0f, -1.0f, -1.0f, // Arrière gauche
-        1.0f, -1.0f, -1.0f, // Arrière droit
-        1.0f, -1.0f,  1.0f, // Avant droit
-        1.0f, -1.0f,  1.0f, // Avant droit
-        -1.0f, -1.0f,  1.0f, // Avant gauche
-        -1.0f, -1.0f, -1.0f  // Arrière gauche
+        -1.0f, -1.0f, -1.0f, 0.0f,-1.0f,0.0f, // Arrière gauche
+        1.0f, -1.0f, -1.0f, 0.0f,-1.0f,0.0f, // Arrière droit
+        1.0f, -1.0f,  1.0f, 0.0f,-1.0f,0.0f, // Avant droit
+        1.0f, -1.0f,  1.0f,  0.0f,-1.0f,0.0f,// Avant droit
+        -1.0f, -1.0f,  1.0f, 0.0f,-1.0f,0.0f, // Avant gauche
+        -1.0f, -1.0f, -1.0f,  0.0f,-1.0f,0.0f // Arrière gauche
     }; 
 
     const char* vertexShaderSource = R"glsl(
     #version 330 core
     layout (location = 0) in vec3 aPos;
+    layout (location = 1) in vec3 aNormal;
 
     uniform mat4 model;
     uniform mat4 view;
     uniform mat4 projection;
 
+    out vec3 Normal;
     out vec3 FragPos;
 
     void main() {
         gl_Position = projection * view * model * vec4(aPos, 1.0f);
-        FragPos = vec3(model * vec4(aPos, 1.0f)); // Position du sommet dans l'espace monde
+        FragPos = vec3(model * vec4(aPos, 1.0f));
+        Normal = mat3(transpose(inverse(model))) * aNormal; // Transforme les normales
     }
-
     )glsl";
 
     const char* fragmentShaderSource = R"glsl(
     #version 330 core
-    out vec4 FragColor;
-    in vec3 FragPos;
+out vec4 FragColor;
+in vec3 Normal;
+in vec3 FragPos;
 
-    void main() {
-    float intensity = 0.2 + 0.8 * pow(FragPos.z, 2.0); // Utilisation d'une fonction quadratique
-        FragColor = vec4(intensity * vec3(1.0, 0.5, 0.2), 1.0); // couleur orange modifiée
-    }
+void main() {
+    vec3 norm = normalize(Normal);
+    vec3 lightPos = vec3(2.0f, 4.0f, 5.0f);
+    vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);
+    vec3 lightDir = normalize(lightPos - FragPos);
+
+    // Éclairage diffus
+    float diff = max(dot(norm, lightDir), 0.0);
+    vec3 diffuse = diff * lightColor;
+
+    // Ajouter un éclairage ambiant
+    vec3 ambient = 0.2 * lightColor;
+
+    // Combiner l'éclairage ambiant et diffus
+    vec3 result = (ambient + diffuse) * vec3(1.0, 0.5, 0.2);
+
+    FragColor = vec4(result, 1.0);
+}
+
 
     )glsl";
 
@@ -202,8 +237,11 @@ int main(int argc, char *argv[]) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     // Attributs de position des sommets
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     // Notez que cela ne désactive pas le VAO actuellement lié, cela désactive simplement le VBO
     glBindBuffer(GL_ARRAY_BUFFER, 0); 
@@ -211,6 +249,8 @@ int main(int argc, char *argv[]) {
     // Désactivez le VAO maintenant
     glBindVertexArray(0);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE);
+
     float rotationSpeed = 1.0f;
     float angleX = 0.0f; // Angle de rotation autour de l'axe X
     float angleY = 0.0f; // Angle de rotation autour de l'axe Y
