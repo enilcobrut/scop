@@ -1,4 +1,6 @@
+
 #include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 #include <iostream>
 #include <cstring>
@@ -44,22 +46,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-       Figure myFigure(filePath.string());
-
-        std::cout << "\n====== map list vertex :  ======\n" << std::endl;
-
-        myFigure.printListCoordVertex();
-
-        std::cout << "\n====== map list Vn :  ======\n" << std::endl;
-
-        myFigure.printListCoordVn();
-
-        std::cout << "\n====== map list Vt :  ======\n" << std::endl;
-
-        myFigure.printListCoordVt();
-        std::cout << "\n====== Face et Points :  ======\n" << std::endl;
-
-        myFigure.printFace();
+    Figure myFigure(filePath.string());
 
     glfwSetErrorCallback(error_callback);
 
@@ -85,55 +72,57 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-       float vertices[] = {
-        // Face avant (Z positif)
-        -1.0f, -1.0f,  1.0f,  0.0f,0.0f,1.0f,// Bas gauche
-        1.0f, -1.0f,  1.0f,  0.0f,0.0f,1.0f,// Bas droit
-        1.0f,  1.0f,  1.0f,  0.0f,0.0f,1.0f,// Haut droit
-        1.0f,  1.0f,  1.0f, 0.0f,0.0f,1.0f, // Haut droit
-        -1.0f,  1.0f,  1.0f, 0.0f,0.0f,1.0f, // Haut gauche
-        -1.0f, -1.0f,  1.0f, 0.0f,0.0f,1.0f, // Bas gauche
+    //    std::vector<float> vertices = {
+    //     // Face avant (Z positif)
+    //     -1.0f, -1.0f,  1.0f,  0.0f,0.0f,1.0f,// Bas gauche
+    //     1.0f, -1.0f,  1.0f,  0.0f,0.0f,1.0f,// Bas droit
+    //     1.0f,  1.0f,  1.0f,  0.0f,0.0f,1.0f,// Haut droit
+    //     1.0f,  1.0f,  1.0f, 0.0f,0.0f,1.0f, // Haut droit
+    //     -1.0f,  1.0f,  1.0f, 0.0f,0.0f,1.0f, // Haut gauche
+    //     -1.0f, -1.0f,  1.0f, 0.0f,0.0f,1.0f, // Bas gauche
 
-        // Face arrière (Z négatif)
-        -1.0f, -1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Bas gauche
-        1.0f, -1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Bas droit
-        1.0f,  1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Haut droit
-        1.0f,  1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Haut droit
-        -1.0f,  1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Haut gauche
-        -1.0f, -1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Bas gauche
+    //     // Face arrière (Z négatif)
+    //     -1.0f, -1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Bas gauche
+    //     1.0f, -1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Bas droit
+    //     1.0f,  1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Haut droit
+    //     1.0f,  1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Haut droit
+    //     -1.0f,  1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Haut gauche
+    //     -1.0f, -1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Bas gauche
 
-        // Face gauche (X négatif)
-        -1.0f,  1.0f,  1.0f,  -1.0f,0.0f,0.0f,// Haut avant
-        -1.0f,  1.0f, -1.0f,  -1.0f,0.0f,0.0f,// Haut arrière
-        -1.0f, -1.0f, -1.0f, -1.0f,0.0f,0.0f, // Bas arrière
-        -1.0f, -1.0f, -1.0f, -1.0f,0.0f,0.0f, // Bas arrière
-        -1.0f, -1.0f,  1.0f,  -1.0f,0.0f,0.0f,// Bas avant
-        -1.0f,  1.0f,  1.0f,  -1.0f,0.0f,0.0f,// Haut avant
+    //     // Face gauche (X négatif)
+    //     -1.0f,  1.0f,  1.0f,  -1.0f,0.0f,0.0f,// Haut avant
+    //     -1.0f,  1.0f, -1.0f,  -1.0f,0.0f,0.0f,// Haut arrière
+    //     -1.0f, -1.0f, -1.0f, -1.0f,0.0f,0.0f, // Bas arrière
+    //     -1.0f, -1.0f, -1.0f, -1.0f,0.0f,0.0f, // Bas arrière
+    //     -1.0f, -1.0f,  1.0f,  -1.0f,0.0f,0.0f,// Bas avant
+    //     -1.0f,  1.0f,  1.0f,  -1.0f,0.0f,0.0f,// Haut avant
 
-        // Face droite (X positif)
-        1.0f,  1.0f,  1.0f,  1.0f,0.0f,0.0f,// Haut avant
-        1.0f, -1.0f, -1.0f,  1.0f,0.0f,0.0f,// Bas arrière
-        1.0f,  1.0f, -1.0f,  1.0f,0.0f,0.0f,// Haut arrière
-        1.0f, -1.0f, -1.0f,  1.0f,0.0f,0.0f,// Bas arrière
-        1.0f,  1.0f,  1.0f,  1.0f,0.0f,0.0f,// Haut avant
-        1.0f, -1.0f,  1.0f,  1.0f,0.0f,0.0f,// Bas avant
+    //     // Face droite (X positif)
+    //     1.0f,  1.0f,  1.0f,  1.0f,0.0f,0.0f,// Haut avant
+    //     1.0f, -1.0f, -1.0f,  1.0f,0.0f,0.0f,// Bas arrière
+    //     1.0f,  1.0f, -1.0f,  1.0f,0.0f,0.0f,// Haut arrière
+    //     1.0f, -1.0f, -1.0f,  1.0f,0.0f,0.0f,// Bas arrière
+    //     1.0f,  1.0f,  1.0f,  1.0f,0.0f,0.0f,// Haut avant
+    //     1.0f, -1.0f,  1.0f,  1.0f,0.0f,0.0f,// Bas avant
 
-        // Face supérieure (Y positif)
-        -1.0f,  1.0f, -1.0f,  0.0f,1.0f,0.0f,// Arrière gauche
-        1.0f,  1.0f, -1.0f,  0.0f,1.0f,0.0f,// Arrière droit
-        1.0f,  1.0f,  1.0f,  0.0f,1.0f,0.0f,// Avant droit
-        1.0f,  1.0f,  1.0f,  0.0f,1.0f,0.0f,// Avant droit
-        -1.0f,  1.0f,  1.0f,  0.0f,1.0f,0.0f,// Avant gauche
-        -1.0f,  1.0f, -1.0f,  0.0f,1.0f,0.0f,// Arrière gauche
+    //     // Face supérieure (Y positif)
+    //     -1.0f,  1.0f, -1.0f,  0.0f,1.0f,0.0f,// Arrière gauche
+    //     1.0f,  1.0f, -1.0f,  0.0f,1.0f,0.0f,// Arrière droit
+    //     1.0f,  1.0f,  1.0f,  0.0f,1.0f,0.0f,// Avant droit
+    //     1.0f,  1.0f,  1.0f,  0.0f,1.0f,0.0f,// Avant droit
+    //     -1.0f,  1.0f,  1.0f,  0.0f,1.0f,0.0f,// Avant gauche
+    //     -1.0f,  1.0f, -1.0f,  0.0f,1.0f,0.0f,// Arrière gauche
 
-        // Face inférieure (Y négatif)
-        -1.0f, -1.0f, -1.0f, 0.0f,-1.0f,0.0f, // Arrière gauche
-        1.0f, -1.0f, -1.0f, 0.0f,-1.0f,0.0f, // Arrière droit
-        1.0f, -1.0f,  1.0f, 0.0f,-1.0f,0.0f, // Avant droit
-        1.0f, -1.0f,  1.0f,  0.0f,-1.0f,0.0f,// Avant droit
-        -1.0f, -1.0f,  1.0f, 0.0f,-1.0f,0.0f, // Avant gauche
-        -1.0f, -1.0f, -1.0f,  0.0f,-1.0f,0.0f // Arrière gauche
-    }; 
+    //     // Face inférieure (Y négatif)
+    //     -1.0f, -1.0f, -1.0f, 0.0f,-1.0f,0.0f, // Arrière gauche
+    //     1.0f, -1.0f, -1.0f, 0.0f,-1.0f,0.0f, // Arrière droit
+    //     1.0f, -1.0f,  1.0f, 0.0f,-1.0f,0.0f, // Avant droit
+    //     1.0f, -1.0f,  1.0f,  0.0f,-1.0f,0.0f,// Avant droit
+    //     -1.0f, -1.0f,  1.0f, 0.0f,-1.0f,0.0f, // Avant gauche
+    //     -1.0f, -1.0f, -1.0f,  0.0f,-1.0f,0.0f // Arrière gauche
+    // }; 
+
+      std::vector<float> vertices =  myFigure.getVertexNormalList();
 
     const char* vertexShaderSource = R"glsl(
     #version 330 core
@@ -214,7 +203,7 @@ void main() {
 
     model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 1.0f, 1.0f));
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-    projection = glm::perspective(glm::radians(100.0f), // Augmenter le FOV pour "zoomer arrière"
+    projection = glm::perspective(glm::radians(60.0f), // Augmenter le FOV pour "zoomer arrière"
                               (float)800 / (float)800, 0.1f, 100.0f);
     glUseProgram(shaderProgram);
 
@@ -234,7 +223,7 @@ void main() {
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER,  vertices.size() * sizeof(float),vertices.data(), GL_STATIC_DRAW);
 
     // Attributs de position des sommets
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
@@ -290,7 +279,7 @@ void main() {
 
             // Dessinez le cube
             glBindVertexArray(VAO);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
+            glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 6);
 
             // Échangez les tampons et interrogez les événements IO
             glfwSwapBuffers(window);

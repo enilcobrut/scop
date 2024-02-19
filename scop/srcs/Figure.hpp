@@ -39,7 +39,8 @@ class Figure {
         void    setListCoordVertex(const std::map<int, std::array<float, 3>>& newValues);
         void    setListCoordVn(const std::map<int, std::array<float, 3>>& newValues);
         void    setListCoordVt(const std::map<int, std::array<float, 2>>& newValues);
-        int getNorme(const std::array<float, 3> &coordVertex);
+        std::vector<float> getVertexNormalList();
+        void    triangusation();
 
         // utils 
         void    printListCoordVertex() const;
@@ -53,4 +54,6 @@ class Figure {
         std::map<int, std::array<float, 3>> listCoordVn;
         std::map<int, std::array<float, 2>> listCoordVt;
         std::vector<std::vector<Point>> listFace;
+        std::vector<Point> vecPoint;
+
 };

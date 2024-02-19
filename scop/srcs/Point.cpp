@@ -8,12 +8,16 @@ Point::Point(const int indexV, int indexVt, int indexVn, std::array<float, 3>coo
 
 
 std::array<float, 3> Point::getNorm() const {
-    float norm = std::sqrt(coordVertex[0] * coordVertex[0] +
-                           coordVertex[1] * coordVertex[1] +
-                           coordVertex[2] * coordVertex[2]);
+    float length = std::sqrt(coordVertex[0] * coordVertex[0] +
+                             coordVertex[1] * coordVertex[1] +
+                             coordVertex[2] * coordVertex[2]);
+    if (length == 0) {
+        return {0, 0, 0};
+    }
 
-    return {norm, norm, norm}; 
+    return {coordVertex[0] / length, coordVertex[1] / length, coordVertex[2] / length};
 }
+
 
 void Point::setIndexVn(int vn) {
 
