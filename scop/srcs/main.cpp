@@ -10,6 +10,7 @@
 #include <GLFW/glfw3.h>
 #include "/home/cjunker/glm/gtc/matrix_transform.hpp"
 #include "/home/cjunker/glm/gtc/type_ptr.hpp"
+#include "Cam.hpp"
 
 void error_callback(int error, const char* description) {
     std::cout << "error: " << error << std::endl;
@@ -33,6 +34,38 @@ void error_callback(int error, const char* description) {
 
         // myFigure.printFace();
      
+glm::vec3 calculateObjectCenter(const std::vector<float>& vertices) {
+    glm::vec3 center(0.0f, 0.0f, 0.0f);
+    int count = 0;
+
+    // Parcourir les sommets et accumuler leurs coordonnées
+    for (size_t i = 0; i < vertices.size(); i += 6) { // Incrémentation de 6 pour passer au sommet suivant
+        center.x += vertices[i];
+        center.y += vertices[i + 1];
+        center.z += vertices[i + 2];
+        count++;
+    }
+
+    // Diviser par le nombre total de sommets pour obtenir la moyenne
+    if (count > 0) {
+        center.x /= count;
+        center.y /= count;
+        center.z /= count;
+    }
+
+    return center;
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    (void)xoffset;
+    Cam* cam = static_cast<Cam*>(glfwGetWindowUserPointer(window));
+    float newDistance = cam->getDistance() - static_cast<float>(yoffset) * 0.1f;
+    // Assurez-vous que la nouvelle distance reste dans des limites raisonnables
+    newDistance = std::max(newDistance, 1.0f);
+    newDistance = std::min(newDistance, 10.0f);
+    cam->setDistance(newDistance);
+}
+
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -72,76 +105,31 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    //    std::vector<float> vertices = {
-    //     // Face avant (Z positif)
-    //     -1.0f, -1.0f,  1.0f,  0.0f,0.0f,1.0f,// Bas gauche
-    //     1.0f, -1.0f,  1.0f,  0.0f,0.0f,1.0f,// Bas droit
-    //     1.0f,  1.0f,  1.0f,  0.0f,0.0f,1.0f,// Haut droit
-    //     1.0f,  1.0f,  1.0f, 0.0f,0.0f,1.0f, // Haut droit
-    //     -1.0f,  1.0f,  1.0f, 0.0f,0.0f,1.0f, // Haut gauche
-    //     -1.0f, -1.0f,  1.0f, 0.0f,0.0f,1.0f, // Bas gauche
-
-    //     // Face arrière (Z négatif)
-    //     -1.0f, -1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Bas gauche
-    //     1.0f, -1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Bas droit
-    //     1.0f,  1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Haut droit
-    //     1.0f,  1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Haut droit
-    //     -1.0f,  1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Haut gauche
-    //     -1.0f, -1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Bas gauche
-
-    //     // Face gauche (X négatif)
-    //     -1.0f,  1.0f,  1.0f,  -1.0f,0.0f,0.0f,// Haut avant
-    //     -1.0f,  1.0f, -1.0f,  -1.0f,0.0f,0.0f,// Haut arrière
-    //     -1.0f, -1.0f, -1.0f, -1.0f,0.0f,0.0f, // Bas arrière
-    //     -1.0f, -1.0f, -1.0f, -1.0f,0.0f,0.0f, // Bas arrière
-    //     -1.0f, -1.0f,  1.0f,  -1.0f,0.0f,0.0f,// Bas avant
-    //     -1.0f,  1.0f,  1.0f,  -1.0f,0.0f,0.0f,// Haut avant
-
-    //     // Face droite (X positif)
-    //     1.0f,  1.0f,  1.0f,  1.0f,0.0f,0.0f,// Haut avant
-    //     1.0f, -1.0f, -1.0f,  1.0f,0.0f,0.0f,// Bas arrière
-    //     1.0f,  1.0f, -1.0f,  1.0f,0.0f,0.0f,// Haut arrière
-    //     1.0f, -1.0f, -1.0f,  1.0f,0.0f,0.0f,// Bas arrière
-    //     1.0f,  1.0f,  1.0f,  1.0f,0.0f,0.0f,// Haut avant
-    //     1.0f, -1.0f,  1.0f,  1.0f,0.0f,0.0f,// Bas avant
-
-    //     // Face supérieure (Y positif)
-    //     -1.0f,  1.0f, -1.0f,  0.0f,1.0f,0.0f,// Arrière gauche
-    //     1.0f,  1.0f, -1.0f,  0.0f,1.0f,0.0f,// Arrière droit
-    //     1.0f,  1.0f,  1.0f,  0.0f,1.0f,0.0f,// Avant droit
-    //     1.0f,  1.0f,  1.0f,  0.0f,1.0f,0.0f,// Avant droit
-    //     -1.0f,  1.0f,  1.0f,  0.0f,1.0f,0.0f,// Avant gauche
-    //     -1.0f,  1.0f, -1.0f,  0.0f,1.0f,0.0f,// Arrière gauche
-
-    //     // Face inférieure (Y négatif)
-    //     -1.0f, -1.0f, -1.0f, 0.0f,-1.0f,0.0f, // Arrière gauche
-    //     1.0f, -1.0f, -1.0f, 0.0f,-1.0f,0.0f, // Arrière droit
-    //     1.0f, -1.0f,  1.0f, 0.0f,-1.0f,0.0f, // Avant droit
-    //     1.0f, -1.0f,  1.0f,  0.0f,-1.0f,0.0f,// Avant droit
-    //     -1.0f, -1.0f,  1.0f, 0.0f,-1.0f,0.0f, // Avant gauche
-    //     -1.0f, -1.0f, -1.0f,  0.0f,-1.0f,0.0f // Arrière gauche
-    // }; 
 
       std::vector<float> vertices =  myFigure.getVertexNormalList();
+    Cam camera(3.0f); // Initialiser la caméra avec une distance de 3.0f
+    glfwSetWindowUserPointer(window, &camera);
+    glfwSetScrollCallback(window, scroll_callback);
 
     const char* vertexShaderSource = R"glsl(
-    #version 330 core
-    layout (location = 0) in vec3 aPos;
-    layout (location = 1) in vec3 aNormal;
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aNormal;
 
-    uniform mat4 model;
-    uniform mat4 view;
-    uniform mat4 projection;
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
-    out vec3 Normal;
-    out vec3 FragPos;
+out vec3 Normal;
+out vec3 FragPos;
 
-    void main() {
-        gl_Position = projection * view * model * vec4(aPos, 1.0f);
-        FragPos = vec3(model * vec4(aPos, 1.0f));
-        Normal = mat3(transpose(inverse(model))) * aNormal; // Transforme les normales
-    }
-    )glsl";
+void main() {
+    gl_Position = projection * view * model * vec4(aPos, 1.0f);
+    FragPos = vec3(model * vec4(aPos, 1.0f));
+    Normal = mat3(model) * aNormal; // Transforme les normales avec la matrice de modèle
+}
+)glsl";
+
 
     const char* fragmentShaderSource = R"glsl(
     #version 330 core
@@ -193,6 +181,9 @@ void main() {
     // Supprimez les shaders une fois liés
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+    
+    //float distanceCamera = 3.0f; // Distance initiale de la caméra
+    glm::vec3 objectCenter = calculateObjectCenter(vertices); // Calculez le centre de l'objet
 
 
     glm::mat4 model = glm::mat4(1.0f);
@@ -241,10 +232,10 @@ void main() {
     glEnable(GL_MULTISAMPLE);
 
     float rotationSpeed = 1.0f;
-    float angleX = 0.0f; // Angle de rotation autour de l'axe X
-    float angleY = 0.0f; // Angle de rotation autour de l'axe Y
+     float angleX = 0.0f; // Angle initial de rotation autour de l'axe X
+        float angleY = 0.0f; // Angle initial de rotation autour de l'axe Y
 
-    
+            
 
         while (!glfwWindowShouldClose(window)) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -263,11 +254,16 @@ void main() {
             if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
                 angleY -= rotationSpeed; // Rotation vers la gauche
             }
+            angleX = fmod(angleX, 360.0f);
+            angleY = fmod(angleY, 360.0f);
             // Mettez à jour les transformations si nécessaire
+                float currentDistance = camera.getDistance();
 
-            // Par exemple, pour faire tourner le cube autour de son axe
-                model = glm::rotate(model, glm::radians(angleX), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotation autour de l'axe X
-                model = glm::rotate(model, glm::radians(angleY), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotation autour de l'axe Y
+                  glm::vec3 cameraPos = objectCenter + glm::vec3(currentDistance * sin(glm::radians(angleY)) * cos(glm::radians(angleX)),
+                                                   currentDistance * sin(glm::radians(angleX)),
+                                                   currentDistance * cos(glm::radians(angleY)) * cos(glm::radians(angleX)));
+    view = glm::lookAt(cameraPos, objectCenter, glm::vec3(0.0f, 1.0f, 0.0f));
+
 
             // Utilisez le programme shader
             glUseProgram(shaderProgram);
