@@ -1,16 +1,17 @@
-# Paramètres de compilation
 NAME = scop
 CC = g++
-CPPFLAGS = -Wall -Wextra -Werror -std=c++20
-INCLUDES = -Iincludes -I/usr/include
-LIBS = -L/usr/lib -lglfw -lGL -lm -lpthread -ldl
-MAKEFLAGS = "-j 10"
+CPPFLAGS = -Wall -Wextra -Werror -std=c++2a
+INCLUDES = -Iincludes -I/usr/include -I/home/cjunker/Downloads/glew-2.1.0/include -I/home/cjunker/glm
+LIBS = -L/usr/lib -L/home/cjunker/Downloads/glew-2.1.0/lib -lglfw -lGL -lm -lpthread -ldl -lGLEW
 
 # Répertoires et fichiers
 SRCS_DIR = srcs
 OBJS_DIR = objs
 SRCS = $(wildcard $(SRCS_DIR)/*.cpp)
 OBJS = $(SRCS:$(SRCS_DIR)/%.cpp=$(OBJS_DIR)/%.o)
+
+# Créer le répertoire objs si nécessaire
+$(shell mkdir -p $(OBJS_DIR))
 
 # Règles
 all: $(NAME)
@@ -19,17 +20,11 @@ $(NAME): $(OBJS)
 	$(CC) $(OBJS) $(CPPFLAGS) $(INCLUDES) -o $(NAME) $(LIBS)
 
 $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp
-	mkdir -p $(OBJS_DIR)
-	$(CC) $< $(CPPFLAGS) $(INCLUDES) -c -o $@
+	$(CC) $(INCLUDES) $(CPPFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(OBJS_DIR)
+	rm -f $(OBJS_DIR)/*.o $(NAME)
 
-fclean: clean
-	rm -f $(NAME)
+re: clean all
 
-re: fclean
-	@make all
-
-
-.PHONY: all clean fclean re
+.PHONY: all clean re
