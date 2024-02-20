@@ -7,32 +7,51 @@
 #include <filesystem>
 #include "Figure.hpp"
 #include <glm.hpp>
-#include <GLFW/glfw3.h>
+
 #include "/home/cjunker/glm/gtc/matrix_transform.hpp"
 #include "/home/cjunker/glm/gtc/type_ptr.hpp"
+#include "Vec3.hpp"
+#include "Mat4.hpp"
+
+#include "scop.hpp"
+float radians(float degrees) {
+    return degrees * static_cast<float>(M_PI) / 180.0f;
+}
+
+void printVerticesAndCenter(const std::vector<float>& vertices) {
+    if (vertices.empty()) {
+        std::cout << "Aucun sommet trouvé." << std::endl;
+        return;
+    }
+
+    Vec3 center(0.0f, 0.0f, 0.0f);
+    int count = 0;
+
+    std::cout << "Sommet:" << std::endl;
+    for (size_t i = 0; i < vertices.size(); i += 6) {
+        // Afficher les coordonnées de chaque sommet
+        std::cout << "v " << vertices[i] << " " << vertices[i + 1] << " " << vertices[i + 2] << std::endl;
+
+        // Ajouter au centre
+        center += Vec3(vertices[i], vertices[i + 1], vertices[i + 2]);
+        count++;
+    }
+
+    if (count > 0) {
+        center /= count;
+    }
+
+    // Afficher les coordonnées du centre
+    std::cout <<RED<< "Centre de l'objet: (" << center.x << ", " << center.y << ", " << center.z << ")" <<RESET<< std::endl;
+}
+
 
 void error_callback(int error, const char* description) {
     std::cout << "error: " << error << std::endl;
     std::cerr << "GLFW Error: " << description << std::endl;
 }
 
-     //   Figure myFigure(filePath.string());
 
-        // std::cout << "\n====== map list vertex :  ======\n" << std::endl;
-
-        // myFigure.printListCoordVertex();
-
-        // std::cout << "\n====== map list Vn :  ======\n" << std::endl;
-
-        // myFigure.printListCoordVn();
-
-        // std::cout << "\n====== map list Vt :  ======\n" << std::endl;
-
-        // myFigure.printListCoordVt();
-        // std::cout << "\n====== Face et Points :  ======\n" << std::endl;
-
-        // myFigure.printFace();
-     
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -71,58 +90,7 @@ int main(int argc, char *argv[]) {
         std::cerr << "Failed to initialize GLEW" << std::endl;
         return -1;
     }
-
-    //    std::vector<float> vertices = {
-    //     // Face avant (Z positif)
-    //     -1.0f, -1.0f,  1.0f,  0.0f,0.0f,1.0f,// Bas gauche
-    //     1.0f, -1.0f,  1.0f,  0.0f,0.0f,1.0f,// Bas droit
-    //     1.0f,  1.0f,  1.0f,  0.0f,0.0f,1.0f,// Haut droit
-    //     1.0f,  1.0f,  1.0f, 0.0f,0.0f,1.0f, // Haut droit
-    //     -1.0f,  1.0f,  1.0f, 0.0f,0.0f,1.0f, // Haut gauche
-    //     -1.0f, -1.0f,  1.0f, 0.0f,0.0f,1.0f, // Bas gauche
-
-    //     // Face arrière (Z négatif)
-    //     -1.0f, -1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Bas gauche
-    //     1.0f, -1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Bas droit
-    //     1.0f,  1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Haut droit
-    //     1.0f,  1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Haut droit
-    //     -1.0f,  1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Haut gauche
-    //     -1.0f, -1.0f, -1.0f,  0.0f,0.0f,-1.0f,// Bas gauche
-
-    //     // Face gauche (X négatif)
-    //     -1.0f,  1.0f,  1.0f,  -1.0f,0.0f,0.0f,// Haut avant
-    //     -1.0f,  1.0f, -1.0f,  -1.0f,0.0f,0.0f,// Haut arrière
-    //     -1.0f, -1.0f, -1.0f, -1.0f,0.0f,0.0f, // Bas arrière
-    //     -1.0f, -1.0f, -1.0f, -1.0f,0.0f,0.0f, // Bas arrière
-    //     -1.0f, -1.0f,  1.0f,  -1.0f,0.0f,0.0f,// Bas avant
-    //     -1.0f,  1.0f,  1.0f,  -1.0f,0.0f,0.0f,// Haut avant
-
-    //     // Face droite (X positif)
-    //     1.0f,  1.0f,  1.0f,  1.0f,0.0f,0.0f,// Haut avant
-    //     1.0f, -1.0f, -1.0f,  1.0f,0.0f,0.0f,// Bas arrière
-    //     1.0f,  1.0f, -1.0f,  1.0f,0.0f,0.0f,// Haut arrière
-    //     1.0f, -1.0f, -1.0f,  1.0f,0.0f,0.0f,// Bas arrière
-    //     1.0f,  1.0f,  1.0f,  1.0f,0.0f,0.0f,// Haut avant
-    //     1.0f, -1.0f,  1.0f,  1.0f,0.0f,0.0f,// Bas avant
-
-    //     // Face supérieure (Y positif)
-    //     -1.0f,  1.0f, -1.0f,  0.0f,1.0f,0.0f,// Arrière gauche
-    //     1.0f,  1.0f, -1.0f,  0.0f,1.0f,0.0f,// Arrière droit
-    //     1.0f,  1.0f,  1.0f,  0.0f,1.0f,0.0f,// Avant droit
-    //     1.0f,  1.0f,  1.0f,  0.0f,1.0f,0.0f,// Avant droit
-    //     -1.0f,  1.0f,  1.0f,  0.0f,1.0f,0.0f,// Avant gauche
-    //     -1.0f,  1.0f, -1.0f,  0.0f,1.0f,0.0f,// Arrière gauche
-
-    //     // Face inférieure (Y négatif)
-    //     -1.0f, -1.0f, -1.0f, 0.0f,-1.0f,0.0f, // Arrière gauche
-    //     1.0f, -1.0f, -1.0f, 0.0f,-1.0f,0.0f, // Arrière droit
-    //     1.0f, -1.0f,  1.0f, 0.0f,-1.0f,0.0f, // Avant droit
-    //     1.0f, -1.0f,  1.0f,  0.0f,-1.0f,0.0f,// Avant droit
-    //     -1.0f, -1.0f,  1.0f, 0.0f,-1.0f,0.0f, // Avant gauche
-    //     -1.0f, -1.0f, -1.0f,  0.0f,-1.0f,0.0f // Arrière gauche
-    // }; 
-
-      std::vector<float> vertices =  myFigure.getVertexNormalList();
+    std::vector<float> vertices =  myFigure.getVertexNormalList();
 
     const char* vertexShaderSource = R"glsl(
     #version 330 core
@@ -151,8 +119,8 @@ in vec3 FragPos;
 
 void main() {
     vec3 norm = normalize(Normal);
-    vec3 lightPos = vec3(2.0f, 4.0f, 5.0f);
-    vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);
+    vec3 lightPos = vec3(4.0f, 8.0f, 5.0f);
+    vec3 lightColor = vec3(8.0f, 1.0f, 6.0f);
     vec3 lightDir = normalize(lightPos - FragPos);
 
     // Éclairage diffus
@@ -194,28 +162,7 @@ void main() {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-
-    glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 view = glm::mat4(1.0f);
-    glm::mat4 projection = glm::mat4(1.0f);
-    float angle = 0.0f; // Angle de rotation en degrés
-
-
-    model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 1.0f, 1.0f));
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-    projection = glm::perspective(glm::radians(60.0f), // Augmenter le FOV pour "zoomer arrière"
-                              (float)800 / (float)800, 0.1f, 100.0f);
-    glUseProgram(shaderProgram);
-
-
-    unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-    unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
-    unsigned int projLoc = glGetUniformLocation(shaderProgram, "projection");
-
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
+    
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -240,7 +187,43 @@ void main() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
 
-    float rotationSpeed = 1.0f;
+
+
+    Vec3 dimensions = Vec3::calculateDimensions(vertices);
+    Vec3 objectCenter = Vec3::calculateObjectCenter(vertices);
+    float maxDimension = std::max({dimensions.x, dimensions.y, dimensions.z});
+    float desiredMaxSize = 2.0f; // Taille maximale souhaitée dans la scène
+    float scaleFactor = (maxDimension > desiredMaxSize) ? (desiredMaxSize / maxDimension) : 1.0f;
+
+    Mat4 model = Mat4(); // Matrice identité
+    model = Mat4::translate(-objectCenter) * model; // Centre l'objet
+   // model = Mat4::scale(Vec3(scaleFactor, scaleFactor, scaleFactor)) * model; // Ajuste la taille
+
+    Mat4 view = Mat4(); // Matrice identité
+    Mat4 projection = Mat4(); // Matrice identité
+    float angle = radians(0.0f); // Convertir en radians
+    //model = Mat4::scale(Vec3(scaleFactor, scaleFactor, scaleFactor));
+    printVerticesAndCenter(vertices);
+    // Rotation
+    model = Mat4::rotate(angle, Vec3(1.0f, 1.0f, 1.0f)) * model;
+
+    // Translation
+    view = Mat4::translate(Vec3(0.0f, 0.0f, -3.0f));
+
+    // Perspective
+    projection = Mat4::perspective(radians(60.0f), 800.0f / 800.0f, 0.1f, 100.0f);
+
+    glUseProgram(shaderProgram);
+    unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+    unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
+    unsigned int projLoc = glGetUniformLocation(shaderProgram, "projection");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.value_ptr());
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.value_ptr());
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, projection.value_ptr());
+
+
+
+    float rotationSpeed = 0.03f;
     float angleX = 0.0f; // Angle de rotation autour de l'axe X
     float angleY = 0.0f; // Angle de rotation autour de l'axe Y
 
@@ -249,8 +232,13 @@ void main() {
         while (!glfwWindowShouldClose(window)) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            model = glm::mat4(1.0f);
-
+            model = Mat4::translate(-objectCenter) * Mat4();; // Centre l'objet
+            model = Mat4::scale(Vec3(scaleFactor, scaleFactor, scaleFactor)) * model; // Ajuste la taille
+            model = Mat4::translate(objectCenter) * model; // Déplace l'objet au centre pour la rotation
+            model = Mat4::rotate(angleX, Vec3(1.0f, 0.0f, 0.0f)) * model; // Rotation autour de l'axe X
+            model = Mat4::rotate(angleY, Vec3(0.0f, 1.0f, 0.0f)) * model; // Rotation autour de l'axe Y
+            model = Mat4::translate(-objectCenter) * model; // Remet l'objet à sa position d'origine
+             angleY += rotationSpeed;
             if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
         angleX -= rotationSpeed; // Rotation vers le haut
             }
@@ -266,16 +254,17 @@ void main() {
             // Mettez à jour les transformations si nécessaire
 
             // Par exemple, pour faire tourner le cube autour de son axe
-                model = glm::rotate(model, glm::radians(angleX), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotation autour de l'axe X
-                model = glm::rotate(model, glm::radians(angleY), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotation autour de l'axe Y
+                //    model = Mat4::rotate(angleX, Vec3(1.0f, 0.0f, 0.0f)) * model;
+                // model = Mat4::rotate(angleY, Vec3(0.0f, 1.0f, 0.0f)) * model;
 
             // Utilisez le programme shader
             glUseProgram(shaderProgram);
 
             // Passer les matrices au shader
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-            glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.value_ptr());
+            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.value_ptr());
+            glUniformMatrix4fv(projLoc, 1, GL_FALSE, projection.value_ptr());
+
 
             // Dessinez le cube
             glBindVertexArray(VAO);
