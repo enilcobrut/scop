@@ -20,61 +20,82 @@ class Mat4 {
             return data[index].data();
         }
 
-        static Mat4 translate(const Vec3& translation) {
-            Mat4 result;
-            result[3][0] = translation.x;
-            result[3][1] = translation.y;
-            result[3][2] = translation.z;
+        static Mat4 translate(const Mat4& mat, const Vec3& vec) {
+            Mat4 result = mat;
+            result[3][0] = mat[0][0] * vec.x + mat[1][0] * vec.y + mat[2][0] * vec.z + mat[3][0];
+            result[3][1] = mat[0][1] * vec.x + mat[1][1] * vec.y + mat[2][1] * vec.z + mat[3][1];
+            result[3][2] = mat[0][2] * vec.x + mat[1][2] * vec.y + mat[2][2] * vec.z + mat[3][2];
+            result[3][3] = mat[0][3] * vec.x + mat[1][3] * vec.y + mat[2][3] * vec.z + mat[3][3];
             return result;
         }
 
-        static Mat4 rotate(float angle, const Vec3& axis) {
-        Mat4 result;
-        float cosAngle = cos(angle);
-        float sinAngle = sin(angle);
-        float oneMinusCos = 1.0f - cosAngle;
+        static Mat4 rotate(const Mat4& mat, float angle, const Vec3& axis) {
+            float rad = radians(angle);
+            float c = cos(rad);
+            float s = sin(rad);
+            float omc = 1.0f - c;
 
-        float x = axis.x;
-        float y = axis.y;
-        float z = axis.z;
+            Vec3 normAxis = axis.normalize();
+            Vec3 temp = normAxis * omc;
 
-        result[0][0] = x * x * oneMinusCos + cosAngle;
-        result[0][1] = x * y * oneMinusCos - z * sinAngle;
-        result[0][2] = x * z * oneMinusCos + y * sinAngle;
-        
-        result[1][0] = y * x * oneMinusCos + z * sinAngle;
-        result[1][1] = y * y * oneMinusCos + cosAngle;
-        result[1][2] = y * z * oneMinusCos - x * sinAngle;
-        
-        result[2][0] = x * z * oneMinusCos - y * sinAngle;
-        result[2][1] = y * z * oneMinusCos + x * sinAngle;
-        result[2][2] = z * z * oneMinusCos + cosAngle;
+            Mat4 rotMat;
+            rotMat[0][0] = c + temp.x * normAxis.x;
+            rotMat[0][1] = temp.x * normAxis.y + s * normAxis.z;
+            rotMat[0][2] = temp.x * normAxis.z - s * normAxis.y;
 
-        return result;
-    }
+            rotMat[1][0] = temp.y * normAxis.x - s * normAxis.z;
+            rotMat[1][1] = c + temp.y * normAxis.y;
+            rotMat[1][2] = temp.y * normAxis.z + s * normAxis.x;
+
+            rotMat[2][0] = temp.z * normAxis.x + s * normAxis.y;
+            rotMat[2][1] = temp.z * normAxis.y - s * normAxis.x;
+            rotMat[2][2] = c + temp.z * normAxis.z;
+
+             Mat4 result;
+            for (int i = 0; i < 4; i++)
+                for (int j = 0; j < 4; j++) {
+                    result[i][j] = 0.0f;
+                    for (int k = 0; k < 4; k++)
+                        result[i][j] += mat[i][k] * rotMat[k][j];
+                }
+
+            return result;
+        }
+
 
     static Mat4 lookAt(Vec3 position, Vec3 target, Vec3 worldUp) {
-    Vec3 zAxis = (position - target).normalize();
-    Vec3 xAxis = Vec3::cross(worldUp, zAxis).normalize();
-    Vec3 yAxis = Vec3::cross(zAxis, xAxis);
+        Vec3 zAxis = (position - target).normalize();
+        Vec3 xAxis = Vec3::cross(worldUp, zAxis).normalize();
+        Vec3 yAxis = Vec3::cross(zAxis, xAxis);
 
 
-    Mat4 viewMatrix;
-    viewMatrix[0][0] = xAxis.x;
-    viewMatrix[1][0] = xAxis.y;
-    viewMatrix[2][0] = xAxis.z;
-    viewMatrix[0][1] = yAxis.x;
-    viewMatrix[1][1] = yAxis.y;
-    viewMatrix[2][1] = yAxis.z;
-    viewMatrix[0][2] = zAxis.x;
-    viewMatrix[1][2] = zAxis.y;
-    viewMatrix[2][2] = zAxis.z;
-    viewMatrix[3][0] = -Vec3::dot(xAxis, position);
-    viewMatrix[3][1] = -Vec3::dot(yAxis, position);
-    viewMatrix[3][2] = -Vec3::dot(zAxis, position);
+        Mat4 viewMatrix;
+        viewMatrix[0][0] = xAxis.x;
+        viewMatrix[1][0] = xAxis.y;
+        viewMatrix[2][0] = xAxis.z;
+        viewMatrix[0][1] = yAxis.x;
+        viewMatrix[1][1] = yAxis.y;
+        viewMatrix[2][1] = yAxis.z;
+        viewMatrix[0][2] = zAxis.x;
+        viewMatrix[1][2] = zAxis.y;
+        viewMatrix[2][2] = zAxis.z;
+        viewMatrix[3][0] = -Vec3::dot(xAxis, position);
+        viewMatrix[3][1] = -Vec3::dot(yAxis, position);
+        viewMatrix[3][2] = -Vec3::dot(zAxis, position);
 
 
-    return viewMatrix;
+        return viewMatrix;
+    }
+
+
+Mat4(const glm::mat4& glmMatrix) {
+        // Copiez les données de glmMatrix dans votre structure de données Mat4
+        // Par exemple, si votre Mat4 utilise un tableau 2D 'data', faites :
+        for (int i = 0; i < 4; ++i) {
+            for (int j = 0; j < 4; ++j) {
+                data[i][j] = glmMatrix[i][j];
+            }
+        }
 }
  static Mat4 zero() {
         Mat4 result;

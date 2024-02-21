@@ -69,6 +69,13 @@ static Vec3 calculateObjectCenter(const std::vector<float>& vertices) {
     return Vec3(maxX - minX, maxY - minY, maxZ - minZ);
 }
 
+// Dans votre classe Vec3, ajoutez cette méthode :
+Vec3 operator*(float scalar) const {
+    return Vec3(x * scalar, y * scalar, z * scalar);
+}
+
+
+
 
       Vec3 normalize() const {
         float length = std::sqrt(x * x + y * y + z * z);
@@ -86,3 +93,4 @@ static Vec3 calculateObjectCenter(const std::vector<float>& vertices) {
     }
 
 };
+

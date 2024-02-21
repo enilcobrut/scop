@@ -221,77 +221,9 @@ void main() {
     glEnable(GL_MULTISAMPLE);
 
 
-
-//     Vec3 dimensions = Vec3::calculateDimensions(vertices);
-//     Vec3 objectCenter = Vec3::calculateObjectCenter(vertices);
-//     float maxDimension = std::max({dimensions.x, dimensions.y, dimensions.z});
-//     float desiredMaxSize = 2.0f; // Taille maximale souhaitée dans la scène
-//     float scaleFactor = (maxDimension > desiredMaxSize) ? (desiredMaxSize / maxDimension) : 1.0f;
-
-//     Mat4 model = Mat4(); // Matrice identité
-//     model = Mat4::translate(-objectCenter) * model; // Centre l'objet
-//    // model = Mat4::scale(Vec3(scaleFactor, scaleFactor, scaleFactor)) * model; // Ajuste la taille
-
-//     Mat4 view = Mat4(); // Matrice identité
-//     Mat4 projection = Mat4(); // Matrice identité
-//     float angle = radians(0.0f); // Convertir en radians
-//     //model = Mat4::scale(Vec3(scaleFactor, scaleFactor, scaleFactor));
-//     printVerticesAndCenter(vertices);
-//     // Rotation
-//     model = Mat4::rotate(angle, Vec3(1.0f, 1.0f, 1.0f)) * model;
-
-//     // Translation
-//     float cameraDistance = 5.0f;
-
-//     // Calculez la position de la caméra basée sur le centre de l'objet
-//     float cameraHeightOffset = 0.0f; // Ajustez cette valeur si nécessaire
-//         Vec3 cameraPosition = Vec3(objectCenter.x, objectCenter.y + cameraHeightOffset, objectCenter.z - cameraDistance);
-
-//     view = Mat4::lookAt(cameraPosition, objectCenter, Vec3(0.0f, 1.0f, 0.0f));
-
-//     view = Mat4::translate(Vec3(0.0f, 0.0f, -3.0f)) * view;
-
-//     // Perspective
-//     projection = Mat4::perspective(radians(60.0f), 800.0f / 800.0f, 0.1f, 100.0f);
-
-//     glUseProgram(shaderProgram);
-//     unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-//     unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
-//     unsigned int projLoc = glGetUniformLocation(shaderProgram, "projection");
-//     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.value_ptr());
-//     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.value_ptr());
-//     glUniformMatrix4fv(projLoc, 1, GL_FALSE, projection.value_ptr());
-
-    Vec3 dimensions = Vec3::calculateDimensions(vertices);
-    Vec3 objectCenter = Vec3::calculateObjectCenter(vertices);
-    float maxDimension = std::max({dimensions.x, dimensions.y, dimensions.z});
-
-    // Déterminer la distance de la caméra en fonction de la plus grande dimension de l'objet
-    float cameraDistance = maxDimension * 2.0f; // Vous pouvez ajuster le multiplicateur selon les besoins
-    Mat4 model = Mat4(); // Matrice identité
-    model = Mat4::translate(-objectCenter) * model; // Centre l'objet
-
-        Mat4 view = Mat4(); // Matrice identité
-    Mat4 projection = Mat4(); // Matrice identité
-
-    // Position de la caméra
-    Vec3 cameraPosition = Vec3(objectCenter.x, objectCenter.y, objectCenter.z - cameraDistance);
-    Vec3 cameraOffset = Vec3(0.0f, 0.0f, cameraDistance); // Décalage derrière l'objet
-    cameraPosition = objectCenter - cameraOffset;
-
-    view = Mat4::lookAt(cameraPosition, objectCenter, Vec3(0.0f, 1.0f, 0.0f));
-
-    // Configuration de la perspective
-    projection = Mat4::perspective(radians(60.0f), 800.0f / 800.0f, 0.1f, 100.0f);
-
-    glUseProgram(shaderProgram);
 unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
 unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
 unsigned int projLoc = glGetUniformLocation(shaderProgram, "projection");
-glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.value_ptr());
-glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.value_ptr());
-glUniformMatrix4fv(projLoc, 1, GL_FALSE, projection.value_ptr());
-
 
     // float rotationSpeed = 0.03f;
     // float angleX = 0.0f; // Angle de rotation autour de l'axe X
@@ -393,9 +325,23 @@ glUniformMatrix4fv(projLoc, 1, GL_FALSE, projection.value_ptr());
 float angleX = 0.0f; // Angle de rotation autour de l'axe X
 float angleY = 0.0f; // Angle de rotation autour de l'axe Y
 
+float rotationSpeed = 0.5f; // Définissez une vitesse de rotation appropriée
 
 while (!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+        angleX -= rotationSpeed; // Rotation vers le haut
+    }
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+        angleX += rotationSpeed; // Rotation vers le bas
+    }
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+        angleY += rotationSpeed; // Rotation vers la droite
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+        angleY -= rotationSpeed; // Rotation vers la gauche
+    }
 
     Vec3 dimensions =Vec3::calculateDimensions(vertices); // Utilisez votre fonction modifiée
     Vec3 objectCenter = Vec3::calculateObjectCenter(vertices); // De même pour cette fonction
@@ -404,18 +350,19 @@ while (!glfwWindowShouldClose(window)) {
 
     Vec3 cameraPosition = objectCenter + Vec3(0.0f, 0.0f, cameraDistance);
     Mat4 view = Mat4::lookAt(cameraPosition, objectCenter, Vec3(0.0f, 1.0f, 0.0f));
-    Mat4 model = Mat4(); // Votre méthode pour créer une matrice identité
     Mat4 projection = Mat4::perspective(Mat4::radians(60.0f), 800.0f / 800.0f, 0.1f, 100.0f);
-   //glm::mat4 projection = glm::perspective(glm::radians(60.0f), 800.0f / 800.0f, 0.1f, 100.0f);
+    Mat4 model = Mat4(); // Création d'une matrice identité
+    model = Mat4::translate(model, -objectCenter); // Translate au centre
+    model = Mat4::rotate(model, angleX, Vec3(1, 0, 0)); // Rotation autour de l'axe X
+    model = Mat4::rotate(model, angleY, Vec3(0, 1, 0)); // Rotation autour de l'axe Y
+    model = Mat4::translate(model, objectCenter); // Translate en arrière
 
-    // Utilisez vos matrices avec OpenGL
     glUseProgram(shaderProgram);
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.value_ptr());
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.value_ptr());
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, projection.value_ptr());
-   //glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-    // Dessiner l'objet
+
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 6);
 
