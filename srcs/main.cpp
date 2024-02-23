@@ -225,9 +225,9 @@ unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
 unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
 unsigned int projLoc = glGetUniformLocation(shaderProgram, "projection");
 
-    // float rotationSpeed = 0.03f;
-    // float angleX = 0.0f; // Angle de rotation autour de l'axe X
-    // float angleY = 0.0f; // Angle de rotation autour de l'axe Y
+    float rotationSpeed = 0.05f;
+    float angleX = 0.0f; // Angle de rotation autour de l'axe X
+    float angleY = 0.0f; // Angle de rotation autour de l'axe Y
 
     
 
@@ -248,13 +248,13 @@ unsigned int projLoc = glGetUniformLocation(shaderProgram, "projection");
 //                                         glm::vec3(0.0f, 1.0f, 0.0f));
 
 //             // Configuration du modèle
-//             model = Mat4::translate(-objectCenter) * Mat4(); // Centre l'objet
-//             // Commentez la ligne ci-dessous si l'objet est suffisamment visible sans mise à l'échelle
-//             // model = Mat4::scale(Vec3(scaleFactor, scaleFactor, scaleFactor)) * model;
-//             model = Mat4::translate(objectCenter) * model; // Déplace l'objet au centre pour la rotation
-//             model = Mat4::rotate(angleX, Vec3(1.0f, 0.0f, 0.0f)) * model; // Rotation X
-//             model = Mat4::rotate(angleY, Vec3(0.0f, 1.0f, 0.0f)) * model; // Rotation Y
-//             model = Mat4::translate(-objectCenter) * model; // Remet l'objet à sa position d'origine
+//             // model = Mat4::translate(-objectCenter) * Mat4(); // Centre l'objet
+//             // // Commentez la ligne ci-dessous si l'objet est suffisamment visible sans mise à l'échelle
+//             // // model = Mat4::scale(Vec3(scaleFactor, scaleFactor, scaleFactor)) * model;
+//             // model = Mat4::translate(objectCenter) * model; // Déplace l'objet au centre pour la rotation
+//             // model = Mat4::rotate(angleX, Vec3(1.0f, 0.0f, 0.0f)) * model; // Rotation X
+//             // model = Mat4::rotate(angleY, Vec3(0.0f, 1.0f, 0.0f)) * model; // Rotation Y
+//             // model = Mat4::translate(-objectCenter) * model; // Remet l'objet à sa position d'origine
 
 //             if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 //         angleX -= rotationSpeed; // Rotation vers le haut
@@ -290,85 +290,103 @@ unsigned int projLoc = glGetUniformLocation(shaderProgram, "projection");
 //             // Échangez les tampons et interrogez les événements IO
 //             glfwSwapBuffers(window);
 //             glfwPollEvents();
-            //         }
-          
-//         while (!glfwWindowShouldClose(window)) {
+//                     }
+        glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 4.0); // Position fixe de la caméra
+        glm::mat4 view = glm::lookAt(cameraPosition, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 projection = glm::perspective(glm::radians(60.0f), 800.0f / 800.0f, 0.1f, 100.0f);
+        while (!glfwWindowShouldClose(window)) {
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            // Gestion des entrées clavier pour la rotation
+            if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+                angleX -= rotationSpeed; // Rotation vers le haut
+            }
+            if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+                angleX += rotationSpeed; // Rotation vers le bas
+            }
+            if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+                angleY += rotationSpeed; // Rotation vers la droite
+            }
+            if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+                angleY -= rotationSpeed; // Rotation vers la gauche
+            }
+            glm::vec3 dimensions = calculateDimensions(vertices);
+            float maxDimension = std::max({dimensions.x, dimensions.y, dimensions.z});
+            float scale = 1.0f / maxDimension;
+
+            // Calcul de la matrice de modèle
+            glm::vec3 objectCenter = calculateObjectCenter(vertices);
+            glm::mat4 translationToOrigin = glm::translate(glm::mat4(1.0f), -objectCenter);
+            glm::mat4 rotationX = glm::rotate(glm::mat4(1.0f), angleX, glm::vec3(1.0f, 0.0f, 0.0f));
+            glm::mat4 rotationY = glm::rotate(glm::mat4(1.0f), angleY, glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));
+            glm::mat4 translationBack = glm::translate(glm::mat4(1.0f), objectCenter);
+
+            glm::mat4 model = translationBack * scaleMatrix * rotationY * rotationX * translationToOrigin;
+                        // Utilisation des matrices GLM avec OpenGL
+            glUseProgram(shaderProgram);
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+            glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+            // Dessiner l'objet
+            glBindVertexArray(VAO);
+            glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 6);
+
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+        }
+
+
+
+
+// float angleX = 0.0f; // Angle de rotation autour de l'axe X
+// float angleY = 0.0f; // Angle de rotation autour de l'axe Y
+
+// float rotationSpeed = 0.5f; // Définissez une vitesse de rotation appropriée
+
+// while (!glfwWindowShouldClose(window)) {
 //     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-//     // Utiliser GLM pour calculer la position de la caméra et les matrices
-//     glm::vec3 dimensions = calculateDimensions(vertices); // Assurez-vous que cette fonction retourne un glm::vec3
-//     glm::vec3 objectCenter = calculateObjectCenter(vertices); // De même pour cette fonction
-//     float maxDimension = glm::max(glm::max(dimensions.x, dimensions.y), dimensions.z);
+//     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+//         angleX -= rotationSpeed; // Rotation vers le haut
+//     }
+//     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+//         angleX += rotationSpeed; // Rotation vers le bas
+//     }
+//     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+//         angleY += rotationSpeed; // Rotation vers la droite
+//     }
+//     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+//         angleY -= rotationSpeed; // Rotation vers la gauche
+//     }
+
+//     Vec3 dimensions =Vec3::calculateDimensions(vertices); // Utilisez votre fonction modifiée
+//     Vec3 objectCenter = Vec3::calculateObjectCenter(vertices); // De même pour cette fonction
+//     float maxDimension = std::max({dimensions.x, dimensions.y, dimensions.z});
 //     float cameraDistance = maxDimension * 2.0f;
 
-//     glm::vec3 cameraPosition = objectCenter + glm::vec3(0.0f, 0.0f, cameraDistance);
-//     glm::mat4 view = glm::lookAt(cameraPosition, objectCenter, glm::vec3(0.0f, 1.0f, 0.0f));
-//     glm::mat4 model = glm::mat4(1.0f); // Matrice identité
-//     glm::mat4 projection = glm::perspective(glm::radians(60.0f), 800.0f / 800.0f, 0.1f, 100.0f);
+//     Vec3 cameraPosition = objectCenter + Vec3(0.0f, 0.0f, cameraDistance);
+//     Mat4 view = Mat4::lookAt(cameraPosition, objectCenter, Vec3(0.0f, 1.0f, 0.0f));
+//     Mat4 projection = Mat4::perspective(Mat4::radians(60.0f), 800.0f / 800.0f, 0.1f, 100.0f);
+//     Mat4 model = Mat4(); // Création d'une matrice identité
+//     model = Mat4::translate(model, -objectCenter); // Translate au centre
+//     model = Mat4::rotate(model, angleX, Vec3(1, 0, 0)); // Rotation autour de l'axe X
+//     model = Mat4::rotate(model, angleY, Vec3(0, 1, 0)); // Rotation autour de l'axe Y
+//     model = Mat4::translate(model, objectCenter); // Translate en arrière
 
-//     // Utiliser les matrices GLM avec OpenGL
 //     glUseProgram(shaderProgram);
-//     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-//     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-//     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+//     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.value_ptr());
+//     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.value_ptr());
+//     glUniformMatrix4fv(projLoc, 1, GL_FALSE, projection.value_ptr());
 
-//     // Dessiner l'objet
+
 //     glBindVertexArray(VAO);
 //     glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 6);
 
 //     glfwSwapBuffers(window);
 //     glfwPollEvents();
 // }
-
-
-
-float angleX = 0.0f; // Angle de rotation autour de l'axe X
-float angleY = 0.0f; // Angle de rotation autour de l'axe Y
-
-float rotationSpeed = 0.5f; // Définissez une vitesse de rotation appropriée
-
-while (!glfwWindowShouldClose(window)) {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-        angleX -= rotationSpeed; // Rotation vers le haut
-    }
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-        angleX += rotationSpeed; // Rotation vers le bas
-    }
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-        angleY += rotationSpeed; // Rotation vers la droite
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-        angleY -= rotationSpeed; // Rotation vers la gauche
-    }
-
-    Vec3 dimensions =Vec3::calculateDimensions(vertices); // Utilisez votre fonction modifiée
-    Vec3 objectCenter = Vec3::calculateObjectCenter(vertices); // De même pour cette fonction
-    float maxDimension = std::max({dimensions.x, dimensions.y, dimensions.z});
-    float cameraDistance = maxDimension * 2.0f;
-
-    Vec3 cameraPosition = objectCenter + Vec3(0.0f, 0.0f, cameraDistance);
-    Mat4 view = Mat4::lookAt(cameraPosition, objectCenter, Vec3(0.0f, 1.0f, 0.0f));
-    Mat4 projection = Mat4::perspective(Mat4::radians(60.0f), 800.0f / 800.0f, 0.1f, 100.0f);
-    Mat4 model = Mat4(); // Création d'une matrice identité
-    model = Mat4::translate(model, -objectCenter); // Translate au centre
-    model = Mat4::rotate(model, angleX, Vec3(1, 0, 0)); // Rotation autour de l'axe X
-    model = Mat4::rotate(model, angleY, Vec3(0, 1, 0)); // Rotation autour de l'axe Y
-    model = Mat4::translate(model, objectCenter); // Translate en arrière
-
-    glUseProgram(shaderProgram);
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.value_ptr());
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.value_ptr());
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, projection.value_ptr());
-
-
-    glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 6);
-
-    glfwSwapBuffers(window);
-    glfwPollEvents();
-}
 
 
     glfwDestroyWindow(window);
